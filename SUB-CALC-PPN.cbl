@@ -21,12 +21,12 @@
 
        LINKAGE SECTION.
        01 SALES PIC 9(7).
-       01 VALCULATED-PPN PIC 9(7).
+       01 CALCULATED-PPN PIC 9(7).
        01 MODAL PIC 9(7).
        01 HARGA-JUAL PIC 9(7).
        01 RETURN-VALUE PIC 9(7).
       *-----------------------
-       PROCEDURE DIVISION USING SALES, VALCULATED-PPN.
+       PROCEDURE DIVISION USING SALES, CALCULATED-PPN.
       *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
        MAIN-PROCEDURE.
       **
@@ -35,6 +35,6 @@
            COMPUTE HARGA-JUAL = SALES * 1.11
            COMPUTE MODAL = SALES / 1.11
            COMPUTE RETURN-VALUE = SALES - MODAL.
-            STOP RUN.
+           GOBACK.
       ** add other procedures here
        END PROGRAM SUB-CALC-PPN.

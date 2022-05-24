@@ -37,18 +37,16 @@
        01 TBL-PENJUALAN.
          05 NAMA-VENDOR PIC X(20).
          05 PENJUALAN PIC 9(7).
-         05 HARGA-JUAL PIC 9(7).
          05 ONGKIR PIC 9(7).
          05 TIPS PIC 9(7).
          05 DRIVER PIC X(20).
-
-         05 PPN PIC 9V99 VALUE 0.11.
 
          05 TOTAL-PENJUALAN PIC 9(7).
          05 TOTAL-PPN PIC 9(7).
          05 TOTAL-ONGKIR PIC 9(7).
          05 TOTAL-TIPS PIC 9(7).
        01 KONFIRMASI PIC X(1).
+       01 INPUT-ANGKA PIC 9(1).
       *-----------------------
        PROCEDURE DIVISION.
       *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -58,19 +56,26 @@
       **
            DISPLAY "PENJUALAN"
            DISPLAY " "
-           open EXTEND Index-file.
-           PERFORM CREATE-DATA thru ACC-KONFIRMASI
-                  UNTIL NAMA-VENDOR = "STOP"
-           CLOSE Index-File.
+           DISPLAY "KETIK 1. UNTUK CREATE DATA"
+           DISPLAY "KETIK 2. UNTUK PANGGIL SUB PPN"
+           ACCEPT INPUT-ANGKA
+
+           CALL "SUB-CALC-PPN" USING PENJUALAN
+           IF INPUT-ANGKA = 1
+                  open EXTEND Index-file.
+                  PERFORM CREATE-DATA thru ACC-KONFIRMASI
+                         UNTIL NAMA-VENDOR = "STOP"
+                  CLOSE Index-File.
+           IF INPUT-ANGKA = 2
+                  CALL "SUB-CALC-PPN" USING PENJUALAN
+                  CANCEL "SUB-CALC-PPN".
+
        CREATE-DATA.
            DISPLAY "NAMA VENDOR : " NO ADVANCING
            ACCEPT NAMA-VENDOR.
        ACC-PENJUALAN.
            DISPLAY "HARGA PENJUALAN : " NO ADVANCING
            ACCEPT PENJUALAN.
-      *    HITUNG HARGA JUAL = PENJUALAN * PPN
-      *       PROJECT 1.2
-           COMPUTE HARGA-JUAL = PENJUALAN * PPN.
        ACC-ONGKIR.
            DISPLAY "HARGA ONGKIR : " NO ADVANCING
            ACCEPT ONGKIR.
@@ -82,7 +87,6 @@
            ACCEPT DRIVER.
        WRITE-REC.
            ADD PENJUALAN TO TOTAL-PENJUALAN
-           ADD PPN TO TOTAL-PPN
            ADD TIPS TO TOTAL-TIPS
            ADD ONGKIR TO TOTAL-ONGKIR
            MOVE TBL-PENJUALAN TO INDEX-RECORD
