@@ -17,10 +17,8 @@
        FILE-CONTROL.
          SELECT Index-File
              ASSIGN TO "C:\MAYBANK\COBOL\GNU PROJECT\data\PENJUALAN.dat"
-      *   RECORD KEY is XNAMA-VENDOR
-      *   ACCESS DYNAMIC
-      *   ORGANIZATION INDEXED.
-          ORGANIZATION IS LINE SEQUENTIAL.
+          ORGANIZATION IS LINE SEQUENTIAL
+          ACCESS MODE IS SEQUENTIAL.
       *-----------------------
        DATA DIVISION.
       *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -41,12 +39,19 @@
          05 TIPS PIC 9(7).
          05 DRIVER PIC X(20).
 
+         05 CALCULATED-PPN PIC 9(7).
+         05 HARGA-JUAL PIC 9(7).
+         05 MODAL PIC 9(7).
+
          05 TOTAL-PENJUALAN PIC 9(7).
-         05 TOTAL-PPN PIC 9(7).
          05 TOTAL-ONGKIR PIC 9(7).
          05 TOTAL-TIPS PIC 9(7).
+         05 TOTAL-HARGA-JUAL PIC 9(7).
+         05 TOTAL-MODAL PIC 9(7).
+         05 TOTAL-RETURN-VALUE PIC 9(7).
        01 KONFIRMASI PIC X(1).
        01 INPUT-ANGKA PIC 9(1).
+       01 WS-EOF PIC X VALUE "N".
       *-----------------------
        PROCEDURE DIVISION.
       *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -57,55 +62,88 @@
            DISPLAY "PENJUALAN"
            DISPLAY " "
            DISPLAY "KETIK 1. UNTUK CREATE DATA"
-           DISPLAY "KETIK 2. UNTUK PANGGIL SUB PPN"
+           DISPLAY "KETIK 2. UNTUK READ DATA"
            ACCEPT INPUT-ANGKA
 
-           CALL "SUB-CALC-PPN" USING PENJUALAN
            IF INPUT-ANGKA = 1
-                  open EXTEND Index-file.
-                  PERFORM CREATE-DATA thru ACC-KONFIRMASI
-                         UNTIL NAMA-VENDOR = "STOP"
-                  CLOSE Index-File.
+                  PERFORM CREATE-DATA
+           END-IF.
+
            IF INPUT-ANGKA = 2
-                  CALL "SUB-CALC-PPN" USING PENJUALAN
-                  CANCEL "SUB-CALC-PPN".
+                  PERFORM PROC-READ
+           ELSE
+                 GO TO END-PROGRAM
+           END-IF.
 
        CREATE-DATA.
            DISPLAY "NAMA VENDOR : " NO ADVANCING
-           ACCEPT NAMA-VENDOR.
-       ACC-PENJUALAN.
+           ACCEPT NAMA-VENDOR
            DISPLAY "HARGA PENJUALAN : " NO ADVANCING
-           ACCEPT PENJUALAN.
-       ACC-ONGKIR.
+           ACCEPT PENJUALAN
            DISPLAY "HARGA ONGKIR : " NO ADVANCING
-           ACCEPT ONGKIR.
-       ACC-TIPS.
+           ACCEPT ONGKIR
            DISPLAY "BERI TIPS : " NO ADVANCING
-           ACCEPT TIPS.
-       ACC-DRIVER.
+           ACCEPT TIPS
            DISPLAY"NAMA DRIVER : " NO ADVANCING
-           ACCEPT DRIVER.
-       WRITE-REC.
+           ACCEPT DRIVER
+
            ADD PENJUALAN TO TOTAL-PENJUALAN
            ADD TIPS TO TOTAL-TIPS
            ADD ONGKIR TO TOTAL-ONGKIR
+
+           OPEN EXTEND Index-file
+
            MOVE TBL-PENJUALAN TO INDEX-RECORD
-              WRITE INDEX-RECORD.
+           WRITE INDEX-RECORD
+
+           CLOSE Index-File
+
+           GO TO ACC-KONFIRMASI.
+
        ACC-KONFIRMASI.
            DISPLAY "MASIH ADA INPUT? (Y/N) : " NO ADVANCING
-           ACCEPT KONFIRMASI.
+           ACCEPT KONFIRMASI
            IF KONFIRMASI = "Y" OR KONFIRMASI = "y"
                   GO TO CREATE-DATA
            ELSE
-                  CLOSE INDEX-FILE
+                  DISPLAY "TOTAL PENJUALAN : " TOTAL-PENJUALAN
+                  DISPLAY "TOTAL TIPS : " TOTAL-TIPS
+                  DISPLAY "TOTAL ONGKIR : " TOTAL-ONGKIR
+                  GO TO END-PROGRAM
+           END-IF.
 
-           DISPLAY TBL-PENJUALAN
-           DISPLAY "TOTAL PENJUALAN : " TOTAL-PENJUALAN
-           DISPLAY "TOTAL PPN : " TOTAL-PPN
-           DISPLAY "TOTAL TIPS : " TOTAL-TIPS
-           DISPLAY "TOTAL ONGKIR : " TOTAL-ONGKIR.
+       PROC-READ.
+           OPEN INPUT Index-file
+           DISPLAY "ASD2"
+           READ Index-file
+              AT END MOVE "Y" TO WS-EOF
+              DISPLAY "ASD1"
+           PERFORM DISPLAY-DATA UNTIL WS-EOF EQUAL TO "Y"
+           DISPLAY "ASD"
+           CLOSE Index-file
+           GO TO END-PROGRAM.
 
+       DISPLAY-DATA.
+           IF WS-EOF EQUAL "N"
+                  MOVE INDEX-RECORD TO TBL-PENJUALAN
+                  CALL "SUB-CALC-PPN"
+                  USING PENJUALAN, CALCULATED-PPN, HARGA-JUAL, MODAL
+                  CANCEL "SUB-CALC-PPN"
+                  ADD HARGA-JUAL TO TOTAL-HARGA-JUAL
+                  ADD CALCULATED-PPN TO TOTAL-RETURN-VALUE
+                  ADD MODAL TO TOTAL-MODAL
+                  DISPLAY "TOTAL SELURUH PENJUALAN : " TOTAL-PENJUALAN
+                  DISPLAY "TOTAL SELURUH TIPS : " TOTAL-TIPS
+                  DISPLAY "TOTAL SELURUH ONGKIR : " TOTAL-ONGKIR
+                  DISPLAY "TOTAL SELURUH HARGA-JUAL : " TOTAL-HARGA-JUAL
+                  DISPLAY "TOTAL SELURUH CALCULATED-PPN : "
+                                CALCULATED-PPN
+                  DISPLAY "TOTAL SELURUH MODAL : " TOTAL-MODAL
+           END-IF.
+           READ INDEX-FILE
+              AT END MOVE "Y" TO WS-EOF.
 
-           STOP RUN.
+       END-PROGRAM.
+              STOP RUN.
       ** add other procedures here
        END PROGRAM TABEL-PENJUALAN.
