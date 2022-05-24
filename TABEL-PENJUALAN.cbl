@@ -37,10 +37,13 @@
        01 TBL-PENJUALAN.
          05 NAMA-VENDOR PIC X(20).
          05 PENJUALAN PIC 9(7).
-         05 PPN PIC 9(7).
+         05 HARGA-JUAL PIC 9(7).
          05 ONGKIR PIC 9(7).
          05 TIPS PIC 9(7).
          05 DRIVER PIC X(20).
+
+         05 PPN PIC 9V99 VALUE 0.11.
+
          05 TOTAL-PENJUALAN PIC 9(7).
          05 TOTAL-PPN PIC 9(7).
          05 TOTAL-ONGKIR PIC 9(7).
@@ -55,7 +58,6 @@
       **
            DISPLAY "PENJUALAN"
            DISPLAY " "
-
            open EXTEND Index-file.
            PERFORM CREATE-DATA thru ACC-KONFIRMASI
                   UNTIL NAMA-VENDOR = "STOP"
@@ -66,10 +68,9 @@
        ACC-PENJUALAN.
            DISPLAY "HARGA PENJUALAN : " NO ADVANCING
            ACCEPT PENJUALAN.
-      *    HITUNG PPN
-           COMPUTE PPN = PENJUALAN * 0.11.
-      *       HARGA SUDAH PPN
-           COMPUTE PENJUALAN = PPN + PENJUALAN.
+      *    HITUNG HARGA JUAL = PENJUALAN * PPN
+      *       PROJECT 1.2
+           COMPUTE HARGA-JUAL = PENJUALAN * PPN.
        ACC-ONGKIR.
            DISPLAY "HARGA ONGKIR : " NO ADVANCING
            ACCEPT ONGKIR.
