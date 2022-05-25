@@ -70,7 +70,7 @@
            END-IF.
 
            IF INPUT-ANGKA = 2
-                  PERFORM PROC-READ
+                  PERFORM READ-INDEX-FILE
            ELSE
                  GO TO END-PROGRAM
            END-IF.
@@ -104,7 +104,7 @@
            DISPLAY "MASIH ADA INPUT? (Y/N) : " NO ADVANCING
            ACCEPT KONFIRMASI
            IF KONFIRMASI = "Y" OR KONFIRMASI = "y"
-                  GO TO CREATE-DATA
+                  GO TO MAIN-PROCEDURE
            ELSE
                   DISPLAY "TOTAL PENJUALAN : " TOTAL-PENJUALAN
                   DISPLAY "TOTAL TIPS : " TOTAL-TIPS
@@ -113,19 +113,31 @@
            END-IF.
 
        PROC-READ.
-           OPEN INPUT Index-file
-           DISPLAY "ASD2"
+           OPEN INPUT Index-file.
            READ Index-file
-              AT END MOVE "Y" TO WS-EOF
-              DISPLAY "ASD1"
-           PERFORM DISPLAY-DATA UNTIL WS-EOF EQUAL TO "Y"
-           DISPLAY "ASD"
-           CLOSE Index-file
-           GO TO END-PROGRAM.
+              AT END MOVE "Y" TO WS-EOF.
+           PERFORM DISPLAY-DATA UNTIL WS-EOF EQUAL TO "Y".
+           CLOSE Index-file.
 
+       read-index-file.
+           open INPUT index-file.
+           perform until ws-eof = "Y"
+             read index-file next
+               at end
+                  move "Y" to ws-EOF
+                  go ACC-KONFIRMASI
+               not at end
+      *           display ws-eof no advancing
+      *           display " : " no advancing
+      *           display index-record
+                 MOVE INDEX-RECORD TO TBL-PENJUALAN
+                 DISPLAY PENJUALAN
+             end-read
+           end-perform.
        DISPLAY-DATA.
            IF WS-EOF EQUAL "N"
                   MOVE INDEX-RECORD TO TBL-PENJUALAN
+                  DISPLAY INDEX-RECORD
                   CALL "SUB-CALC-PPN"
                   USING PENJUALAN, CALCULATED-PPN, HARGA-JUAL, MODAL
                   CANCEL "SUB-CALC-PPN"
@@ -144,6 +156,7 @@
               AT END MOVE "Y" TO WS-EOF.
 
        END-PROGRAM.
+              CLOSE INDEX-FILE
               STOP RUN.
       ** add other procedures here
        END PROGRAM TABEL-PENJUALAN.

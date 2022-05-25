@@ -38,7 +38,6 @@
       **
       * The main procedure of the program
       **
-       DISPLAY L-SALES
            COMPUTE HARGA-JUAL = L-SALES * 1.11
            MOVE HARGA-JUAL TO L-HARGA-JUAL
 
