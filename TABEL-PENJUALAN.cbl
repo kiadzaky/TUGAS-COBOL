@@ -131,9 +131,15 @@
       *           display " : " no advancing
       *           display index-record
                  MOVE INDEX-RECORD TO TBL-PENJUALAN
-                 DISPLAY PENJUALAN
+                 CALL "SUB-CALC-PPN"
+                  USING PENJUALAN
+                  CANCEL "SUB-CALC-PPN"
              end-read
            end-perform.
+
+
+
+
        DISPLAY-DATA.
            IF WS-EOF EQUAL "N"
                   MOVE INDEX-RECORD TO TBL-PENJUALAN

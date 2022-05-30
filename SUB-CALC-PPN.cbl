@@ -25,26 +25,18 @@
        01 RETURN-VALUE PIC 9(7).
 
        LINKAGE SECTION.
-       01 L-SALES PIC 9(7).
-       01 L-CALCULATED-PPN PIC 9(7).
-       01 L-HARGA-JUAL PIC 9(7).
-       01 L-MODAL PIC 9(7).
+             01 L-SALES PIC s9(7).
+             01  L-CALCULATED-PPN PIC s9(7) VALUE 0.
+             01  L-HARGA-JUAL PIC s9(7).
+             01  L-MODAL  PIC s9(7).
 
       *-----------------------
-       PROCEDURE DIVISION USING L-SALES, L-CALCULATED-PPN,
-              L-HARGA-JUAL, L-MODAL.
+       PROCEDURE DIVISION USING L-SALES, L-CALCULATED-PPN.
       *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
        MAIN-PROCEDURE.
       **
       * The main procedure of the program
       **
-           COMPUTE HARGA-JUAL = L-SALES * 1.11
-           MOVE HARGA-JUAL TO L-HARGA-JUAL
-
-           COMPUTE MODAL = L-SALES / 1.11
-           MOVE MODAL TO L-MODAL
-
-           COMPUTE RETURN-VALUE = L-SALES - MODAL
-           MOVE RETURN-VALUE TO L-CALCULATED-PPN
-
+           DISPLAY L-SALES
+           COMPUTE L-CALCULATED-PPN = L-SALES - 1
            GOBACK.
